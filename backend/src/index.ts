@@ -2,50 +2,49 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { config } from "dotenv";
-import fs from "node:fs/promises";
-import path from "node:path";
+import { MongoClient, ObjectId } from "mongodb";
 
 config();
 
 const app = new Hono();
-const BOOKMARKS_FILE = path.join(process.cwd(), "bookmarks.json");
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:8788";
+const DB_NAME = "nstart";
+const COLLECTION_NAME = "bookmarks";
+
+let bookmarksCollection: any;
+
+async function connectToMongo() {
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  const db = client.db(DB_NAME);
+  bookmarksCollection = db.collection(COLLECTION_NAME);
+  console.log("Connected to MongoDB");
+}
+
+connectToMongo();
 
 app.use("/*", cors({
   origin: "*",
   credentials: true,
 }));
 
-async function getBookmarks() {
-  try {
-    const data = await fs.readFile(BOOKMARKS_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function saveBookmarks(bookmarks: any[]) {
-  await fs.writeFile(BOOKMARKS_FILE, JSON.stringify(bookmarks, null, 2));
-}
-
 app.get("/bookmarks", async (c) => {
-  const bookmarks = await getBookmarks();
+  const bookmarks = await bookmarksCollection.find({}).toArray();
   return c.json(bookmarks);
 });
 
 app.post("/bookmarks", async (c) => {
   const bookmark = await c.req.json();
-  const bookmarks = await getBookmarks();
-  bookmarks.push({ ...bookmark, id: Date.now().toString() });
-  await saveBookmarks(bookmarks);
-  return c.json({ success: true });
+  const result = await bookmarksCollection.insertOne({
+    ...bookmark,
+    createdAt: new Date(),
+  });
+  return c.json({ success: true, id: result.insertedId });
 });
 
 app.delete("/bookmarks/:id", async (c) => {
   const id = c.req.param("id");
-  let bookmarks = await getBookmarks();
-  bookmarks = bookmarks.filter((b: any) => b.id !== id);
-  await saveBookmarks(bookmarks);
+  await bookmarksCollection.deleteOne({ _id: new ObjectId(id) });
   return c.json({ success: true });
 });
 
