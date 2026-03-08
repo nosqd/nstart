@@ -1,0 +1,20 @@
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import webExtension from 'vite-plugin-web-extension'
+
+export default defineConfig({
+  plugins: [
+    svelte(),
+    webExtension({
+      manifest: './manifest.json',
+      browser: 'chrome',
+      startUrl: 'chrome://newtab',
+      devtools: true,
+    }),
+  ],
+  base: './',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+})
