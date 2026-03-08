@@ -40,8 +40,6 @@
                   - mongodb_data:/data/db
                 environment:
                   MONGO_INITDB_DATABASE: nstart
-                networks:
-                  - nstart
                 healthcheck:
                   test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
                   interval: 5s
@@ -55,9 +53,7 @@
                 ports:
                   - "8787:8787"
                 environment:
-                  - MONGO_URI=mongodb://mongodb:8788
-                networks:
-                  - nstart
+                  MONGO_URI: "mongodb://mongodb:27017"
                 depends_on:
                   mongodb:
                     condition: service_healthy
@@ -65,9 +61,6 @@
 
             volumes:
               mongodb_data:
-
-            networks:
-              nstart:
           '';
         };
       }
