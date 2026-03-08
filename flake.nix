@@ -48,7 +48,7 @@
 
               backend:
                 build:
-                  context: .
+                  context: ${self}
                   dockerfile: Dockerfile
                 ports:
                   - "8787:8787"
