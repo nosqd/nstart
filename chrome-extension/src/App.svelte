@@ -1,6 +1,6 @@
 <script lang="ts">
     let query = $state("");
-    let bookmarks = $state<{ id: string; url: string; icon: string }[]>([]);
+    let bookmarks = $state<{ _id: string; url: string; name: string; icon?: string }[]>([]);
 
     async function loadBookmarks() {
         try {
@@ -22,15 +22,16 @@
     async function addBookmark() {
         const url = window.prompt("Enter URL:");
         if (!url) return;
+        const name = window.prompt("Enter name:");
+        if (!name) return;
         const icon = window.prompt(
-            "Enter icon name (e.g., github, youtube, twitter):",
+            "Enter icon name (optional, e.g., github, youtube, twitter):",
         );
-        if (!icon) return;
         try {
             await fetch("http://localhost:8787/bookmarks", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url, icon }),
+                body: JSON.stringify({ url, name, icon }),
             });
             loadBookmarks();
         } catch (e) {
@@ -57,7 +58,7 @@
         />
 
         <div class="bookmarks-grid">
-            {#each bookmarks as bm}
+            {#each bookmarks as bm (bm._id)}
                 <div class="bookmark-item">
                     <a
                         href={bm.url.startsWith("http")
@@ -72,7 +73,7 @@
                                 alt=""
                             />
                         </div>
-                        <span class="bm-name">{bm.icon}</span>
+                        <span class="bm-name">{bm.name}</span>
                     </a>
                 </div>
             {/each}
