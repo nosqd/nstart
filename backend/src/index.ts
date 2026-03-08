@@ -21,12 +21,15 @@ async function connectToMongo() {
   console.log("Connected to MongoDB");
 }
 
-connectToMongo();
+await connectToMongo();
 
-app.use("/*", cors({
-  origin: "*",
-  credentials: true,
-}));
+app.use(
+  "/*",
+  cors({
+    origin: "*",
+    credentials: true,
+  }),
+);
 
 app.get("/bookmarks", async (c) => {
   const bookmarks = await bookmarksCollection.find({}).toArray();
