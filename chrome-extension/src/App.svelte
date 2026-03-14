@@ -3,6 +3,19 @@
     let bookmarks = $state<
         { _id: string; url: string; name: string; icon?: string }[]
     >([]);
+    let ipinfoPromise = $state(loadIpInfo());
+
+    async function loadIpInfo() {
+        const res = await (
+            await fetch("https://ip.nosqd.dev", {
+                headers: { Accept: "application/json" },
+            })
+        ).json();
+        return res;
+    }
+    setInterval(() => {
+        ipinfoPromise = loadIpInfo();
+    }, 5000);
 
     async function loadBookmarks() {
         try {
@@ -45,6 +58,15 @@
 </script>
 
 <main>
+    <div class="ip-info">
+        {#await ipinfoPromise}
+            <p>Loading...</p>
+        {:then value}
+            <p>{value.flag} {value.country} @ {value.asn_org}</p>
+        {:catch error}
+            <p>Failed to load IP Info: {error.message}</p>
+        {/await}
+    </div>
     <div class="pivot-container">
         <div class="greeting">
             Welcome, <span class="accent">nosqd</span>!
@@ -66,7 +88,6 @@
                         href={bm.url.startsWith("http")
                             ? bm.url
                             : `https://${bm.url}`}
-                        target="_blank"
                         class="bookmark-link"
                     >
                         <div class="bm-icon">
@@ -89,12 +110,13 @@
         padding: 0;
         box-sizing: border-box;
     }
-    :global(body) {
-        background: #282828;
-        color: #ebdbb2;
-        font-family: "JetBrains Mono", monospace;
-        height: 100vh;
-        overflow: hidden;
+
+    .ip-info {
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        font-size: 16px;
+        margin-top: 8px;
     }
     .pivot-container {
         position: absolute;
