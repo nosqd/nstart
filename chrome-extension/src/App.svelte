@@ -1,6 +1,8 @@
 <script lang="ts">
     let query = $state("");
-    let bookmarks = $state<{ _id: string; url: string; name: string; icon?: string }[]>([]);
+    let bookmarks = $state<
+        { _id: string; url: string; name: string; icon?: string }[]
+    >([]);
 
     async function loadBookmarks() {
         try {
@@ -88,7 +90,7 @@
         box-sizing: border-box;
     }
     :global(body) {
-        background: #1d2021;
+        background: #282828;
         color: #ebdbb2;
         font-family: "JetBrains Mono", monospace;
         height: 100vh;
