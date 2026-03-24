@@ -51,21 +51,6 @@ app.delete("/bookmarks/:id", async (c) => {
   return c.json({ success: true });
 });
 
-app.get("/suggest", async (c) => {
-  const query = c.req.query("q");
-  if (!query) return c.json([]);
-  try {
-    const response = await fetch(
-      `https://suggestqueries.google.com/complete/search?client=chrome&q=${query}`,
-    );
-    if (!response.ok) return c.json([], 500);
-    const data = (await response.json()) as any[];
-    return c.json(data[1]);
-  } catch {
-    return c.json([], 500);
-  }
-});
-
 serve({ fetch: app.fetch, port: 8787 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`);
 });
